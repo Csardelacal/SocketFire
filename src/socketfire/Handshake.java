@@ -1,10 +1,12 @@
+package socketfire;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.apache.commons.codec.binary.Base64;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,7 +36,8 @@ public class Handshake {
 				key = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 				try {
 					MessageDigest md = MessageDigest.getInstance("SHA-1");
-					key = Base64.encode(md.digest(key.getBytes("UTF-8")));
+					Base64 base64 = new Base64();
+					key = new String(base64.encode(md.digest(key.getBytes("UTF-8"))));
 					return key;
 				}
 				catch(NoSuchAlgorithmException e) {
