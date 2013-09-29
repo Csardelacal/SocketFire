@@ -5,13 +5,12 @@ package socketfire;
  * and open the template in the editor.
  */
 
-
-import org.apache.commons.codec.binary.Base64;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import socketfire.handshake.Header;
+import socketfire.handshake.LocationHeader;
+import socketfire.handshake.MalformedHeaderException;
+import socketfire.handshake.SecureWebSocketKeyHeader;
+import socketfire.handshake.SpecialHeaderException;
 
 /**
  *
@@ -19,44 +18,46 @@ import java.util.logging.Logger;
  */
 public class Handshake {
 	
-	private String[] headers;
+	private HashMap<String, Header> headers = new HashMap<>();
 	
-	public Handshake(String s) {
+	public Handshake(String s) throws MalformedHeaderException {
 		System.out.println(s);
-		this.headers = s.split("\n");
-	}
-	
-	public String getSecWebSocketAccept() {
-		int l = this.headers.length;
-		for (int i = 0; i < l; i++) {
-			String[] info = this.headers[i].split(":");
-			if (info.length > 0 && info[0].trim().equals("Sec-WebSocket-Key")) {
-				String key = info[1].trim();
-				System.out.println("Key: " + key);
-				key = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-				try {
-					MessageDigest md = MessageDigest.getInstance("SHA-1");
-					Base64 base64 = new Base64();
-					key = new String(base64.encode(md.digest(key.getBytes("UTF-8"))));
-					return key;
+		String[] headers_received = s.split("\n");
+		
+		for (String header : headers_received) {
+			Header h = null;
+			try {
+				h = new Header(header);
+			} catch (SpecialHeaderException ex) {
+				Class search = ex.getCorrectType();
+				if (search.equals(LocationHeader.class)) {
+					h = new LocationHeader(header);
 				}
-				catch(NoSuchAlgorithmException e) {
-					e.printStackTrace();
-				} catch (UnsupportedEncodingException ex) {
-					Logger.getLogger(Handshake.class.getName()).log(Level.SEVERE, null, ex);
-				} 
+				else if (search.equals(SecureWebSocketKeyHeader.class)) {
+					h = new SecureWebSocketKeyHeader(header);
+				}
+			}
+			
+			if (h != null) {
+				this.headers.put(h.getKey(), h);
 			}
 		}
-		
-		return "";
+	}
+	
+	public Header getRequestHeader(String name) {
+		if (this.headers.containsKey(name)) {
+			return this.headers.get(name);
+		}
+		else {
+			return null;
+		}
 	}
 	
 	public String getHeaders() {
 		return "HTTP/1.1 101 Switching Protocols\r\n" +
-			"Upgrade: websocket\r\n" +
-			"Connection: Upgrade\r\n" +
-			"Sec-WebSocket-Accept: " + this.getSecWebSocketAccept() + "\r\n" +
-			//"Sec-WebSocket-Protocol: chat\r\n" +
+			new Header("Upgrade", "WebSocket") + "\r\n" +
+			new Header("Connection", "Upgrade") +"\r\n" +
+			new Header("Sec-WebSocket-Accept", ((SecureWebSocketKeyHeader)this.headers.get("Sec-WebSocket-Key")).getAcceptKey()) + "\r\n" +
 			"\r\n";
 	}
 	
