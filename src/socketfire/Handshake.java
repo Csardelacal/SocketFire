@@ -21,7 +21,7 @@ public class Handshake {
 	private HashMap<String, Header> headers = new HashMap<>();
 	
 	public Handshake(String s) throws MalformedHeaderException {
-		System.out.println(s);
+		//System.out.println(s);
 		String[] headers_received = s.split("\n");
 		
 		for (String header : headers_received) {

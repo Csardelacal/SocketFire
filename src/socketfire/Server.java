@@ -31,11 +31,7 @@ public class Server extends Thread {
 	public void broadcast(String message) {
 		int l = this.clients.size();
 		for (int i = 0; i < l; i++) {
-			try {
-				this.clients.get(i).send(message);
-			} catch (IOException ex) {
-				Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-			}
+			this.clients.get(i).send(message);
 		}
 	}
 	

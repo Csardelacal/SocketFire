@@ -5,6 +5,18 @@ package socketfire;
  * and open the template in the editor.
  */
 
+/*
+var sockets = new Array();
+var counter = 0;
+for (var i = 0; i < 10; i++) {
+  var s = new WebSocket("ws://localhost:1337/test")
+  sockets.push(s);
+  s.onopen = function (e) {this.send("1");}
+  s.onmessage = function (e) {console.log(e); if (parseInt(e.data) < 5) this.send(""+(parseInt(e.data) + 1)); else s.close(); counter++}
+}
+For testing
+*/
+
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -30,9 +42,9 @@ public class Client extends Thread {
 	private final PrintWriter out;
 	private final Server server;
 	private final Channel channel;
+	private final Queue queue;
 	
 	public static final int MASK_SIZE = 4;
-	public static final int SINGLE_FRAME_UNMASKED = 0x81;
 	
 	public Client(Server server, Socket s) throws IOException, MalformedHeaderException {
 		this.server = server;
@@ -52,6 +64,8 @@ public class Client extends Thread {
 		Handshake handshake = new Handshake(headers);
 		headers = handshake.getHeaders();
 		this.channel = this.server.getChannel(handshake.getRequestHeader("_location").getValue());
+		this.queue = new Queue(this.socket);
+		this.queue.start();
 		
 		this.out.write(headers);
 		this.out.flush();
@@ -60,31 +74,12 @@ public class Client extends Thread {
 		//this.out = null;
 	}
 	
-	public void send(String message) throws IOException {
-		byte[] msg = message.getBytes();
-		System.out.println("Sending to client");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BufferedOutputStream os = new BufferedOutputStream(socket.getOutputStream());
-		//first byte is kind of frame
-		baos.write(SINGLE_FRAME_UNMASKED);
-
-		//Next byte is length of payload
-		baos.write(msg.length);
-
-		//Then goes the message
-		baos.write(msg);
-		baos.flush();
-		baos.close();
-		//This function only prints the byte representation of the frame in hex to console
-		convertAndPrint(baos.toByteArray());
-
-		//Send the frame to the client
-		os.write(baos.toByteArray(), 0, baos.size());
-		os.flush();
+	public void send(String message) {
+		this.queue.queueMessage(message);
 	}
 	
 	public void parseMessage(String s) {
-		System.out.println(s);
+		//System.out.println(s);
 		this.channel.broadcast(s);
 	}
 	
@@ -102,9 +97,9 @@ public class Client extends Thread {
 			//rawIn is a Socket.getInputStream();
 			while(!this.socket.isClosed()){    //Read the first two bytes of the message, the frame type byte - and the payload length byte
 				byte[] buf = readBytes(2);
-				System.out.println("Headers:");
+				//System.out.println("Headers:");
 				//Print them in nice hex to console
-				convertAndPrint(buf);
+				//convertAndPrint(buf);
 				//And it with 00001111 to get four lower bits only, which is the opcode
 				int opcode = buf[0] & 0x0F;
 
@@ -119,12 +114,12 @@ public class Client extends Thread {
 				//Else I just assume it's a single framed text message (opcode 1)
 				else {
 					final int payloadSize = getSizeOfPayload(buf[1]);
-					System.out.println("Payloadsize: " + payloadSize);
+					//System.out.println("Payloadsize: " + payloadSize);
 
 					//Read the mask, which is 4 bytes, and than the payload
 					buf = readBytes(MASK_SIZE + payloadSize);
-					System.out.println("Payload:");
-					convertAndPrint(buf);
+					//System.out.println("Payload:");
+					//convertAndPrint(buf);
 					//method continues below!    
 					buf = unMask(Arrays.copyOfRange(buf, 0, 4), Arrays.copyOfRange(buf, 4, buf.length));
 					String message = new String(buf);

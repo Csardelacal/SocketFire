@@ -54,11 +54,7 @@ public class Channel {
 	void broadcast(String s) {
 		int l = this.clients.size();
 		for (int i = 0; i < l; i++) {
-			try {
-				this.clients.get(i).send(s);
-			} catch (IOException ex) {
-				Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-			}
+			this.clients.get(i).send(s);
 		}
 	}
 	
