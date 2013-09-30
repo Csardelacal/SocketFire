@@ -40,7 +40,7 @@ public class Channel {
 		}
 	}
 	
-	public void dropClient(Client client) {
+	public synchronized void dropClient(Client client) {
 		if (this.clients.contains(client)) {
 			this.clients.remove(client);
 			this.server.dropClient(client);

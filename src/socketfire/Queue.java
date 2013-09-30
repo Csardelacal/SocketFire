@@ -20,11 +20,11 @@ import java.util.logging.Logger;
  */
 public class Queue extends Thread {
 	
-	private final Socket socket;
+	private final SocketAdapter socket;
 	private final ArrayList<String> messages = new ArrayList<>();
 	public static final int SINGLE_FRAME_UNMASKED = 0x81;
 	
-	public Queue(Socket socket) {
+	public Queue(SocketAdapter socket) {
 		this.socket = socket;
 	}
 	
@@ -38,37 +38,13 @@ public class Queue extends Thread {
 			}
 		}
 		
-		this.send(this.messages.remove(0));
+		this.socket.write(this.messages.remove(0));
 		
 	}
 	
 	public synchronized void queueMessage(String message) {
 		this.messages.add(message);
 		notify();
-	}
-	
-	public void send(String message) throws IOException {
-		
-		byte[] msg = message.getBytes();
-		//System.out.println("Sending to client");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BufferedOutputStream os = new BufferedOutputStream(socket.getOutputStream());
-		//first byte is kind of frame
-		baos.write(SINGLE_FRAME_UNMASKED);
-
-		//Next byte is length of payload
-		baos.write(msg.length);
-
-		//Then goes the message
-		baos.write(msg);
-		baos.flush();
-		baos.close();
-		//This function only prints the byte representation of the frame in hex to console
-		//convertAndPrint(baos.toByteArray());
-
-		//Send the frame to the client
-		os.write(baos.toByteArray(), 0, baos.size());
-		os.flush();
 	}
 	
 	public void run() {
