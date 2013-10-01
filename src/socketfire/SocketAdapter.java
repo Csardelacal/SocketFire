@@ -25,9 +25,11 @@ public class SocketAdapter {
 	private BufferedOutputStream out;
 	private InputStreamReader in;
 	private boolean requestedClosing = false;
+	private final Client client;
 	
-	public SocketAdapter(Socket socket) throws IOException {
+	public SocketAdapter(Socket socket, Client client) throws IOException {
 		this.socket = socket;
+		this.client = client;
 		this.out = new BufferedOutputStream(socket.getOutputStream());
 		this.in  = new InputStreamReader(socket.getInputStream());
 	}
@@ -86,11 +88,11 @@ public class SocketAdapter {
 				//Opcode 8 is close connection
 				if (opcode == 8) {
 					//Client want to close connection!
+					this.client.finish();
 					System.out.println("Client closed!");
 					//this.queue.interrupt();
-					socket.shutdownInput();
 					this.requestedClosing = true;
-					//this.channel.dropClient(this);
+					socket.shutdownInput();
 					//TODO: Server should unregister the client
 				} 
 				//Else I just assume it's a single framed text message (opcode 1)

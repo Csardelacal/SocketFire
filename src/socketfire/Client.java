@@ -46,7 +46,7 @@ public class Client extends Thread {
 	public Client(Server server, Socket s) throws IOException, MalformedHeaderException {
 		this.server = server;
 		this.socket = s;
-		this.socketAdapter = new SocketAdapter(this.socket);
+		this.socketAdapter = new SocketAdapter(this.socket, this);
 		this.in  = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 		this.out = new PrintWriter(this.socket.getOutputStream(), true);
 		
@@ -92,6 +92,12 @@ public class Client extends Thread {
 		while (null != (str = this.socketAdapter.read())) {
 			this.parseMessage(str);
 		}
+	}
+
+	public synchronized void finish() {
+		this.channel.dropClient(this);
+		this.queue.interrupt();
+		this.interrupt();
 	}
 	
 }
