@@ -6,10 +6,7 @@
 
 package socketfire;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,19 +20,22 @@ public class Queue extends Thread {
 	private final SocketAdapter socket;
 	private final ArrayList<String> messages = new ArrayList<>();
 	public static final int SINGLE_FRAME_UNMASKED = 0x81;
+	public static int id = 0;
 	
 	public Queue(SocketAdapter socket) {
 		this.socket = socket;
+		this.setName("Queue" + (id++));
 	}
 	
 	public synchronized void dispatch() throws IOException {
 		
-		while (this.messages.isEmpty()) {
-			try {
+		try {
+			while (this.messages.isEmpty()) {
 				wait();
-			} catch (InterruptedException ex) {
-				//The thread was interrupted, silent failure.
-			}
+			} 
+		} catch (InterruptedException ex) {
+			//The thread was interrupted, silent failure.
+			System.out.println("Thread interrupted");
 		}
 		
 		this.socket.write(this.messages.remove(0));

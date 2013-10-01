@@ -35,15 +35,19 @@ public class Channel {
 	}
 	
 	public void registerClient(Client client) {
-		if (!this.clients.contains(client)) {
-			this.clients.add(client);
+		synchronized(this) {
+			if (!this.clients.contains(client)) {
+				this.clients.add(client);
+			}
 		}
 	}
 	
-	public synchronized void dropClient(Client client) {
-		if (this.clients.contains(client)) {
-			this.clients.remove(client);
-			this.server.dropClient(client);
+	public void dropClient(Client client) {
+		synchronized(this) {
+			if (this.clients.contains(client)) {
+				this.clients.remove(client);
+				this.server.dropClient(client);
+			}
 		}
 	}
 
@@ -52,9 +56,11 @@ public class Channel {
 	}
 
 	void broadcast(String s) {
-		int l = this.clients.size();
-		for (int i = 0; i < l; i++) {
-			this.clients.get(i).send(s);
+		synchronized(this) {
+			int l = this.clients.size();
+			for (int i = 0; i < l; i++) {
+				this.clients.get(i).send(s);
+			}
 		}
 	}
 	

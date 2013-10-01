@@ -37,12 +37,8 @@ public class SocketAdapter {
 	public void write(String message) throws IOException {
 		synchronized (this) {
 			
-			if (this.requestedClosing) {
-				socket.close();
-				return;
-			}
-			
 			if (this.socket.isClosed()) {
+				this.shutdown();
 				return;
 			}
 			
@@ -88,11 +84,12 @@ public class SocketAdapter {
 				//Opcode 8 is close connection
 				if (opcode == 8) {
 					//Client want to close connection!
-					this.client.finish();
 					System.out.println("Client closed!");
 					//this.queue.interrupt();
 					this.requestedClosing = true;
 					socket.shutdownInput();
+					this.shutdown();
+					return null;
 					//TODO: Server should unregister the client
 				} 
 				//Else I just assume it's a single framed text message (opcode 1)
@@ -144,4 +141,14 @@ public class SocketAdapter {
 		}
 		System.out.println(sb.toString());
     }
+
+	private void shutdown() throws IOException {
+		synchronized(this) {
+			if (this.requestedClosing) {
+				this.client.finish();
+				socket.close();
+				return;
+			}
+		}
+	}
 }
