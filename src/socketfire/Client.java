@@ -11,23 +11,20 @@ var counter = 0;
 for (var i = 0; i < 10; i++) {
   var s = new WebSocket("ws://localhost:1337/test")
   sockets.push(s);
-  s.onopen = function (e) {this.send("1");}
-  s.onmessage = function (e) {if (parseInt(e.data) < 4) this.send(""+(parseInt(e.data) + 1)); else s.close(); counter++}
+  s.onopen = function (e) {for (var i = 0; i < 20; i++) e.srcElement.send(""+i);}
+  s.onmessage = function (e) {if (parseInt(e.data) == 19) e.srcElement.close(); counter++}
+  s.onclose = function (e) {console.log("Socket closed");}
   s.onerror = function (e) {console.log(e);}
 }
 For testing
 */
 
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import socketfire.handshake.MalformedHeaderException;
 
 /**
