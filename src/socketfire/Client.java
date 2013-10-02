@@ -25,7 +25,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import socketfire.handshake.MalformedHeaderException;
+import socketfire.message.AuthMessage;
+import socketfire.message.ChannelMessage;
+import socketfire.message.Message;
+import socketfire.message.STDMessage;
+import socketfire.message.ServerMessage;
 
 /**
  *
@@ -68,17 +76,45 @@ public class Client extends Thread {
 		this.out.write(headers);
 		this.out.flush();
 		this.channel.registerClient(this);
-		this.send("Welcome to the EQTV server");
+		this.send(new STDMessage(null, "Welcome to the EQTV server"));
 		//this.out = null;
 	}
 	
-	public void send(String message) {
+	public void send(Message message) {
 		this.queue.queueMessage(message);
 	}
 	
-	public void parseMessage(String s) {
+	public Message parseMessage(String s) {
 		//System.out.println(s);
-		this.channel.broadcast(s);
+		JSONObject data;
+		JSONArray argdata;
+		String[] args;
+		
+		try {
+			data = new JSONObject(s);
+			switch(Integer.parseInt(data.getString("type"))) {
+				case 0:
+					return new STDMessage(this, data.getString("payload"));
+				case 2:
+					argdata = data.getJSONArray("args");
+					args = new String[10];
+					for (int i = 0; i < argdata.length(); i++) args[i] = argdata.getString(i);
+					return new ChannelMessage(this, data.getString("action"), args);
+				case 3:
+					argdata = data.getJSONArray("args");
+					args = new String[10];
+					for (int i = 0; i < argdata.length(); i++) args[i] = argdata.getString(i);
+					return new ServerMessage(this, data.getString("action"), args);
+				case 1:
+					return new AuthMessage(this, data.get("payload"));
+			}
+			//this.channel.broadcast(data.getString("payload"));
+		}
+		catch (JSONException e) {
+			System.out.println("Corrupted data was received from client");
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -90,7 +126,8 @@ public class Client extends Thread {
 		
 		String str;
 		while (null != (str = this.socketAdapter.read())) {
-			this.parseMessage(str);
+			Message msg = this.handleMessage(this.parseMessage(str));
+			if (msg instanceof STDMessage) this.channel.broadcast(msg);
 		}
 	}
 
@@ -98,6 +135,10 @@ public class Client extends Thread {
 		this.channel.dropClient(this);
 		this.queue.interrupt();
 		this.interrupt();
+	}
+
+	private Message handleMessage(Message msg) {
+		return this.server.handleMessage(msg);
 	}
 	
 }

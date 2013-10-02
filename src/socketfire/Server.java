@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import socketfire.handshake.MalformedHeaderException;
+import socketfire.message.Message;
 
 /**
  *
@@ -23,12 +24,13 @@ public class Server extends Thread {
 	private int port;
 	private HashMap<String, Channel> channels = new HashMap<>();
 	private ArrayList<Client> clients = new ArrayList<>();
+	private ArrayList<MessageEventListener> messageListeners = new ArrayList<>();
 
 	public Server(int port) {
 		this.port = port;
 	}
 	
-	public void broadcast(String message) {
+	public void broadcast(Message message) {
 		int l = this.clients.size();
 		for (int i = 0; i < l; i++) {
 			this.clients.get(i).send(message);
@@ -72,4 +74,20 @@ public class Server extends Thread {
 	public void dropClient(Client client) {
 		this.clients.remove(client);
 	}
+
+	Message handleMessage(Message msg) {
+		if (!this.messageListeners.isEmpty()) {
+			for (int i = 0; i < this.messageListeners.size(); i++) {
+				msg = this.messageListeners.get(i).onMessage(msg);
+			}
+			return msg;
+		}
+		else {
+			return msg;
+		}
+	}
+	
+	public void addMessageListener(MessageEventListener listener) {
+		this.messageListeners.add(listener);
+	} 
 }

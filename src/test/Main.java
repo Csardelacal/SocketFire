@@ -6,7 +6,9 @@
 
 package test;
 
+import socketfire.MessageEventListener;
 import socketfire.Server;
+import socketfire.message.STDMessage;
 
 /**
  *
@@ -15,7 +17,17 @@ import socketfire.Server;
 public class Main {
 	
 	public static void main(String[] args) {
-		new Server(1337).start();
+		Server s = new Server(1337);
+		s.addMessageListener(new MessageEventListener<STDMessage>() {
+
+			@Override
+			public STDMessage onMessage(STDMessage message) {
+				message.setPayload(message.getMessage().replaceAll("hello", "hello world"));
+				return message;
+			}
+		});
+		
+		s.start();
 	}
 	
 }

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import socketfire.message.Message;
 
 /**
  *
@@ -55,7 +56,7 @@ public class Channel {
 		return clients;
 	}
 
-	void broadcast(String s) {
+	void broadcast(Message s) {
 		synchronized(this) {
 			int l = this.clients.size();
 			for (int i = 0; i < l; i++) {
