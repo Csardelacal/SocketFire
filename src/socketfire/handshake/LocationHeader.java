@@ -27,7 +27,11 @@ public class LocationHeader extends Header{
 			throw new MalformedHeaderException("Expected get header, received " + data[0]);
 		}
 		
-		this.channel = data[1].split("/")[1];
+		String[] location = data[1].split("/");
+		if (location.length > 1) {
+			this.channel = location[1];
+		}
+		else throw new MalformedHeaderException("Invalid channel name");
 		
 	}
 

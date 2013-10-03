@@ -16,12 +16,17 @@ public abstract class Message {
 	
 	public static final int TYPE_CHAT    = 0;
 	public static final int TYPE_AUTH    = 1;
-	public static final int TYPE_CHANNEL = 2;
-	public static final int TYPE_SERVER  = 3;
+	public static final int TYPE_USER    = 2;
+	public static final int TYPE_CHANNEL = 3;
+	public static final int TYPE_SERVER  = 4;
+	
+	private int type = 0;
+	private Client src;
+	private Client target = null;
 	
 	private Object payload;
-	private int type;
-	private Client src;
+	private boolean bubble = true;
+	
 	
 	public Message(int type, Object payload, Client src) {
 		this.payload = payload;
@@ -44,5 +49,31 @@ public abstract class Message {
 	public void setType(int type) {
 		this.type = type;
 	}
+	
+	public void stopPropagation() {
+		this.bubble = false;
+	}
+
+	public boolean doesBubble() {
+		return this.bubble;
+	}
+
+	public Client getSrc() {
+		return src;
+	}
+
+	public void setSrc(Client src) {
+		this.src = src;
+	}
+
+	public Client getTarget() {
+		return target;
+	}
+
+	public void setTarget(Client target) {
+		this.target = target;
+	}
+	
+	
 	
 }

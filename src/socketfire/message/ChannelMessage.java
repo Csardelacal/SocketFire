@@ -15,7 +15,7 @@ import socketfire.Client;
 public class ChannelMessage extends Message {
 
 	public ChannelMessage(Client client, String action, String[] args) {
-		super(2, null, client);
+		super(Message.TYPE_CHANNEL, null, client);
 	}
 	
 }

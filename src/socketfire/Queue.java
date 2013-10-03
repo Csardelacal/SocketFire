@@ -44,8 +44,17 @@ public class Queue extends Thread {
 		Message msg = this.messages.remove(0);
 		JSONObject send = new JSONObject();
 		try {
-			send.put("type",    String.valueOf(msg.getType()));
-			send.put("payload", (String)msg.getPayload());
+			send.put("type",    msg.getType());
+			
+			if (msg.getPayload() instanceof String) {
+				send.put("payload", msg.getPayload());
+			} else {
+				send.put("payload", msg.getPayload());
+			}
+			
+			if (msg.getSrc() != null) {
+				send.put("src",     msg.getSrc().getClientName());
+			}
 		} catch (JSONException e) {}
 		this.socket.write(send.toString());
 		

@@ -8,49 +8,55 @@ package socketfire;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import socketfire.handshake.MalformedHeaderException;
+import socketfire.message.AuthMessage;
+import socketfire.message.ChannelMessage;
 import socketfire.message.Message;
+import socketfire.message.STDMessage;
+import socketfire.message.ServerMessage;
+import socketfire.message.UserMessage;
 
 /**
  *
  * @author cesar
  */
-public class Server extends Thread {
+public class Server extends Dispatcher implements Runnable {
 	
 	private int port;
 	private HashMap<String, Channel> channels = new HashMap<>();
-	private ArrayList<Client> clients = new ArrayList<>();
-	private ArrayList<MessageEventListener> messageListeners = new ArrayList<>();
+	
+	private final EventManager<STDMessage> stdmessageEventManager = new EventManager<>();
+	private final EventManager<ChannelMessage> channelmessageEventManager = new EventManager<>();
+	private final EventManager<ServerMessage> severmessageEventManager = new EventManager<>();
+	private final EventManager<AuthMessage> authmessageEventManager = new EventManager<>();
+	private final EventManager<UserMessage> usermessageEventManager = new EventManager<>();
 
 	public Server(int port) {
 		this.port = port;
-	}
-	
-	public void broadcast(Message message) {
-		int l = this.clients.size();
-		for (int i = 0; i < l; i++) {
-			this.clients.get(i).send(message);
-		}
+		this.addMessageListener(Message.TYPE_CHAT, new DefaultMessageMirror());
 	}
 	
 	@Override
 	public void run() {
 		try {
 			ServerSocket s = new ServerSocket(this.port);
+			Socket clientsock = null;
 			Client client;
 		
 			while (true) {
 				try {
-					client = new Client(this, s.accept());
+					client = new Client(this, clientsock = s.accept());
 					System.out.println("Client connected");
 					client.start();
 					System.out.println("Client started");
-					this.clients.add(client);
+					this.addClient(client);
 				} catch (MalformedHeaderException ex) {
+					if (clientsock != null && !clientsock.isClosed()) clientsock.close();
 					Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -71,23 +77,23 @@ public class Server extends Thread {
 		}
 	}
 
-	public void dropClient(Client client) {
-		this.clients.remove(client);
+	public void handleMessage(Message msg) {
+		switch(msg.getType()) {
+			case 0: this.stdmessageEventManager.trigger((STDMessage)msg); break;
+			case 1: this.authmessageEventManager.trigger((AuthMessage)msg); break;
+			case 2: this.usermessageEventManager.trigger((UserMessage)msg); break;
+			case 3: this.channelmessageEventManager.trigger((ChannelMessage)msg); break;
+			case 4: this.severmessageEventManager.trigger((ServerMessage)msg); break;
+		}
 	}
 
-	Message handleMessage(Message msg) {
-		if (!this.messageListeners.isEmpty()) {
-			for (int i = 0; i < this.messageListeners.size(); i++) {
-				msg = this.messageListeners.get(i).onMessage(msg);
-			}
-			return msg;
-		}
-		else {
-			return msg;
+	public void addMessageListener(int type, MessageEventListener messageEventListener) {
+		switch(type) {
+			case 0: this.stdmessageEventManager.addEventListener(messageEventListener); break;
+			case 1: this.authmessageEventManager.addEventListener(messageEventListener); break;
+			case 2: this.usermessageEventManager.addEventListener(messageEventListener); break;
+			case 3: this.channelmessageEventManager.addEventListener(messageEventListener); break;
+			case 4: this.severmessageEventManager.addEventListener(messageEventListener); break;
 		}
 	}
-	
-	public void addMessageListener(MessageEventListener listener) {
-		this.messageListeners.add(listener);
-	} 
 }

@@ -6,6 +6,9 @@ package socketfire;
  */
 
 /*
+
+s.send(JSON.stringify({type: 0, payload: "Hello World"}));
+
 var sockets = new Array();
 var counter = 0;
 for (var i = 0; i < 10; i++) {
@@ -34,6 +37,7 @@ import socketfire.message.ChannelMessage;
 import socketfire.message.Message;
 import socketfire.message.STDMessage;
 import socketfire.message.ServerMessage;
+import socketfire.message.UserMessage;
 
 /**
  *
@@ -48,6 +52,9 @@ public class Client extends Thread {
 	private final Server server;
 	private final Channel channel;
 	private final Queue queue;
+	private static int idCounter = 0;
+	
+	private String name;
 	
 	public static final int MASK_SIZE = 4;
 	
@@ -57,6 +64,8 @@ public class Client extends Thread {
 		this.socketAdapter = new SocketAdapter(this.socket, this);
 		this.in  = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 		this.out = new PrintWriter(this.socket.getOutputStream(), true);
+		
+		this.name = "User - " + (Client.idCounter++);
 		
 		String headers = "";
 		String read;
@@ -92,20 +101,25 @@ public class Client extends Thread {
 		
 		try {
 			data = new JSONObject(s);
-			switch(Integer.parseInt(data.getString("type"))) {
-				case 0:
+			switch(data.getInt("type")) {
+				case Message.TYPE_CHAT:
 					return new STDMessage(this, data.getString("payload"));
-				case 2:
+				case Message.TYPE_USER:
+					argdata = data.getJSONArray("args");
+					args = new String[10];
+					for (int i = 0; i < argdata.length(); i++) args[i] = argdata.getString(i);
+					return new UserMessage(this, data.getString("action"), args);
+				case Message.TYPE_CHANNEL:
 					argdata = data.getJSONArray("args");
 					args = new String[10];
 					for (int i = 0; i < argdata.length(); i++) args[i] = argdata.getString(i);
 					return new ChannelMessage(this, data.getString("action"), args);
-				case 3:
+				case Message.TYPE_SERVER:
 					argdata = data.getJSONArray("args");
 					args = new String[10];
 					for (int i = 0; i < argdata.length(); i++) args[i] = argdata.getString(i);
 					return new ServerMessage(this, data.getString("action"), args);
-				case 1:
+				case Message.TYPE_AUTH:
 					return new AuthMessage(this, data.get("payload"));
 			}
 			//this.channel.broadcast(data.getString("payload"));
@@ -126,8 +140,7 @@ public class Client extends Thread {
 		
 		String str;
 		while (null != (str = this.socketAdapter.read())) {
-			Message msg = this.handleMessage(this.parseMessage(str));
-			if (msg instanceof STDMessage) this.channel.broadcast(msg);
+			this.handleMessage(this.parseMessage(str));
 		}
 	}
 
@@ -137,8 +150,22 @@ public class Client extends Thread {
 		this.interrupt();
 	}
 
-	private Message handleMessage(Message msg) {
-		return this.server.handleMessage(msg);
+	private void handleMessage(Message msg) {
+		if (msg == null) return;
+		this.server.handleMessage(msg);
+	}
+
+	public Server getServer() {
+		return server;
+	}
+	
+	public String getClientName() {
+		return this.name;
+	}
+	
+	public void setClientName(String name) {
+		this.name = name;
+		this.setName("Client - " + this.name);
 	}
 	
 }

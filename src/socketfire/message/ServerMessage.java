@@ -15,7 +15,7 @@ import socketfire.Client;
 public class ServerMessage extends Message {
 
 	public ServerMessage(Client client, String action, String[] args) {
-		super(3, null, client);
+		super(Message.TYPE_SERVER, null, client);
 	}
 	
 }

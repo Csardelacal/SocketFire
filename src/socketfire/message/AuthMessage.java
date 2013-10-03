@@ -15,7 +15,7 @@ import socketfire.Client;
 public class AuthMessage extends Message {
 
 	public AuthMessage(Client client, Object payload) {
-		super(1, payload, client);
+		super(Message.TYPE_AUTH, payload, client);
 	}
 	
 }

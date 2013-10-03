@@ -6,14 +6,17 @@
 
 package socketfire;
 
-import socketfire.message.Message;
+import socketfire.message.STDMessage;
 
 /**
  *
  * @author cesar
  */
-public abstract class MessageEventListener<E extends Message> {
+public class DefaultMessageMirror extends MessageEventListener<STDMessage> {
 	
-	public abstract void onMessage(E message);
+	@Override
+	public void onMessage(STDMessage message) {
+		message.getSrc().getServer().dispatch(message);
+	}
 	
 }
