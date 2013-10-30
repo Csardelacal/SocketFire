@@ -8,6 +8,7 @@ package test;
 
 import socketfire.MessageEventListener;
 import socketfire.Server;
+import socketfire.message.ChannelMessage;
 import socketfire.message.Message;
 import socketfire.message.STDMessage;
 import socketfire.message.UserMessage;
@@ -27,6 +28,34 @@ public class Main {
 			public void onMessage(STDMessage message) {
 				message.setPayload(message.getMessage().replaceAll("hello", "hello world"));
 			}
+		});
+		
+		s.addMessageListener(Message.TYPE_CHANNEL, new MessageEventListener<ChannelMessage>() {
+
+			@Override
+			public void onMessage(ChannelMessage message) {
+				if (message.getAction().equals("silence")) {
+					message.getSrc().getChannel().setSilenced(true);
+				}
+				if (message.getAction().equals("unsilence")) {
+					message.getSrc().getChannel().setSilenced(false);
+				}
+			}
+
+		});
+		
+		s.addMessageListener(Message.TYPE_CHANNEL, new MessageEventListener<ChannelMessage>() {
+
+			@Override
+			public void onMessage(ChannelMessage message) {
+				if (message.getAction().equals("play")) {
+					message.getSrc().getChannel().dispatch(message);
+				}
+				if (message.getAction().equals("pause")) {
+					message.getSrc().getChannel().dispatch(message);
+				}
+			}
+
 		});
 		
 		s.addMessageListener(Message.TYPE_USER, new MessageEventListener<UserMessage>() {

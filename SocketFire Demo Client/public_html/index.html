@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+	<head>
+		<title>Web Socket Demo</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<link rel="stylesheet" type="text/css" href="css/app.css">
+	</head>
+	<body>
+      <div class="header">
+			<div class="logo">
+				EQTV
+			</div>
+			<div class="UCP">
+				<img class="avatar">
+				<span class="username">Username</span>
+			</div>
+			<div class="search">
+				<input type="text" class="search-bar" placeholder="Go to channel">
+			</div>
+		</div>
+		
+		<div class="banner"></div>
+		
+		<div class="main">
+			<div class="player">
+				<div id="ytplayer"></div>
+			</div>
+			<div class="chat">
+				<div class="sink">
+					<a class="button" id="silence">Silence</a>
+					<a class="button" id="unsilence">Un-silence</a>
+					<a class="button" id="playlist" style="float: right">Playlist</a>
+				</div>
+				<div class="history" id="history">
+					<div class="entry hidden" data-lysine-view="historyentry">
+						<img class="avatar">
+						<span class="username" data-for="username"></span>
+						<span class="message" data-for="body"></span>
+					</div>
+				</div>
+				<textarea class="editor" id="editor" ></textarea>
+			</div>
+		</div>
+		<script type="text/javascript" src="js/lysine.js"></script>
+		<script type="text/javascript" src="js/socketfire.js"></script>
+		<script type="text/javascript" src="js/youtube.js"></script>
+		
+		<script type="text/javascript">
+			var admin = document.location.hash.substr(1) === 'admin';
+			var s = new SocketFire('localhost:1337', 'test');
+			s.onSTDMessage = function(e) {
+				var v = new Lysine.view("historyentry");
+				v.setData({'username': e.src, 'body' : add_new_lines(safe_tags_replace(e.payload.trim()))});
+				setTimeout( function() {
+					v.getHTML().className = 'entry';
+					document.getElementById('history').scrollTop = 9999999;
+					
+				}, 20);
+			};
+			
+			if (!admin) {
+				s.onChannelMessage = function(e) {
+					
+					var sync = parseInt(e.args[0]);
+					if (e.action === 'play') {
+						console.log("Play");
+						player.seekTo(sync, true);
+						player.playVideo();
+					}
+					if (e.action === 'pause') {
+						console.log("Pause");
+						player.seekTo(sync, true);
+						player.pauseVideo();
+					}
+				};
+			}
+			
+			document.querySelector('#editor').addEventListener('keyup', function (e) {
+				console.log(e);
+				if (e.keyCode === 13 && !e.shiftKey && !e.ctrlKey) {
+					s.sendSTDMessage(this.value);
+					this.value = '';
+				}
+			});
+			
+			document.querySelector('#silence').addEventListener('click', function (e) {
+				s.sendChannelMessage('silence');
+			});
+			
+			document.querySelector('#unsilence').addEventListener('click', function (e) {
+				s.sendChannelMessage('unsilence');
+			});
+
+			var tagsToReplace = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;'
+			};
+
+			function replaceTag(tag) {
+				return tagsToReplace[tag] || tag;
+			}
+
+			function safe_tags_replace(str) {
+				return str.replace(/[&<>]/g, replaceTag);
+			}
+			
+			function add_new_lines(str) {
+				return str.replace(/[\n]/g, '<br/>');
+			}
+		</script>
+	</body>
+</html>

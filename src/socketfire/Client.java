@@ -84,7 +84,7 @@ public class Client extends Thread {
 		
 		this.out.write(headers);
 		this.out.flush();
-		this.channel.registerClient(this);
+		this.channel.addClient(this);
 		this.send(new STDMessage(null, "Welcome to the EQTV server"));
 		//this.out = null;
 	}
@@ -138,9 +138,12 @@ public class Client extends Thread {
 	public void run() {
 		this.queue.start();
 		
-		String str;
-		while (null != (str = this.socketAdapter.read())) {
-			this.handleMessage(this.parseMessage(str));
+		PartialMessage str = null;
+		while (null != (str = this.socketAdapter.read(str))) {
+			if (str.isComplete()) {
+				this.handleMessage(this.parseMessage(str.getMessage()));
+				str = null;
+			}
 		}
 	}
 
@@ -166,6 +169,10 @@ public class Client extends Thread {
 	public void setClientName(String name) {
 		this.name = name;
 		this.setName("Client - " + this.name);
+	}
+	
+	public Channel getChannel() {
+		return this.channel;
 	}
 	
 }

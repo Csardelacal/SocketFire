@@ -18,6 +18,7 @@ import socketfire.message.Message;
 abstract public class Dispatcher {
 	
 	private final ArrayList<Client> clients = new ArrayList<>();
+	private boolean silenced = false;
 	
 	public synchronized void addClient(Client c) {
 		this.clients.add(c);
@@ -30,6 +31,11 @@ abstract public class Dispatcher {
 	}
 	
 	public void dispatch(Message m) {
+		
+		if (this.isSilenced()) {
+			return;
+		}
+		
 		if (m.getTarget() != null) {
 			if (this.clients.contains(m.getTarget())) {
 				m.getTarget().send(m);
@@ -43,6 +49,14 @@ abstract public class Dispatcher {
 				this.clients.get(i).send(m);
 			}
 		}
+	}
+	
+	public void setSilenced(boolean silenced) {
+		this.silenced = silenced;
+	}
+
+	public boolean isSilenced() {
+		return this.silenced;
 	}
 	
 }

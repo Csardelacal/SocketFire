@@ -30,7 +30,7 @@ public class Queue extends Thread {
 		this.setName("Queue" + (id++));
 	}
 	
-	public synchronized void dispatch() throws IOException {
+	public synchronized boolean dispatch() throws IOException {
 		
 		try {
 			while (this.messages.isEmpty()) {
@@ -39,6 +39,7 @@ public class Queue extends Thread {
 		} catch (InterruptedException ex) {
 			//The thread was interrupted, silent failure.
 			System.out.println("Thread interrupted");
+			return false;
 		}
 		
 		Message msg = this.messages.remove(0);
@@ -49,7 +50,9 @@ public class Queue extends Thread {
 			if (msg.getPayload() instanceof String) {
 				send.put("payload", msg.getPayload());
 			} else {
-				send.put("payload", msg.getPayload());
+				JSONObject payload = (JSONObject)msg.getPayload();
+				send.put("action", payload.get("action"));
+				send.put("args",   payload.get("args"));
 			}
 			
 			if (msg.getSrc() != null) {
@@ -57,6 +60,8 @@ public class Queue extends Thread {
 			}
 		} catch (JSONException e) {}
 		this.socket.write(send.toString());
+		
+		return true;
 		
 	}
 	
@@ -67,9 +72,8 @@ public class Queue extends Thread {
 	
 	public void run() {
 		try {
-			while (true) {
-					this.dispatch();
-			}
+			while (this.dispatch()) {}
+			System.out.println("Finished queue");
 		} catch (IOException ex) {
 			Logger.getLogger(Queue.class.getName()).log(Level.SEVERE, null, ex);
 		}

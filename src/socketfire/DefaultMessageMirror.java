@@ -16,7 +16,7 @@ public class DefaultMessageMirror extends MessageEventListener<STDMessage> {
 	
 	@Override
 	public void onMessage(STDMessage message) {
-		message.getSrc().getServer().dispatch(message);
+		message.getSrc().getChannel().dispatch(message);
 	}
 	
 }

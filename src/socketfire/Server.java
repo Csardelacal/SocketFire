@@ -88,12 +88,16 @@ public class Server extends Dispatcher implements Runnable {
 	}
 
 	public void addMessageListener(int type, MessageEventListener messageEventListener) {
-		switch(type) {
-			case 0: this.stdmessageEventManager.addEventListener(messageEventListener); break;
-			case 1: this.authmessageEventManager.addEventListener(messageEventListener); break;
-			case 2: this.usermessageEventManager.addEventListener(messageEventListener); break;
-			case 3: this.channelmessageEventManager.addEventListener(messageEventListener); break;
-			case 4: this.severmessageEventManager.addEventListener(messageEventListener); break;
+		try {
+			switch(type) {
+				case 0: this.stdmessageEventManager.addEventListener(messageEventListener); break;
+				case 1: this.authmessageEventManager.addEventListener(messageEventListener); break;
+				case 2: this.usermessageEventManager.addEventListener(messageEventListener); break;
+				case 3: this.channelmessageEventManager.addEventListener(messageEventListener); break;
+				case 4: this.severmessageEventManager.addEventListener(messageEventListener); break;
+			}
+		} catch (Exception e) {
+			System.out.println("Could not attach listener - " + e.getMessage());
 		}
 	}
 }

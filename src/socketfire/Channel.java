@@ -16,11 +16,10 @@ import socketfire.message.Message;
  *
  * @author cesar
  */
-public class Channel {
+public class Channel extends Dispatcher {
 	
 	private Server server;
 	private String name;
-	private final ArrayList<Client> clients = new ArrayList<>();
 
 	public Channel(Server server, String name) {
 		this.server = server;
@@ -33,36 +32,6 @@ public class Channel {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-	
-	public void registerClient(Client client) {
-		synchronized(this) {
-			if (!this.clients.contains(client)) {
-				this.clients.add(client);
-			}
-		}
-	}
-	
-	public void dropClient(Client client) {
-		synchronized(this) {
-			if (this.clients.contains(client)) {
-				this.clients.remove(client);
-				this.server.dropClient(client);
-			}
-		}
-	}
-
-	public ArrayList<Client> getClients() {
-		return clients;
-	}
-
-	void broadcast(Message s) {
-		synchronized(this) {
-			int l = this.clients.size();
-			for (int i = 0; i < l; i++) {
-				this.clients.get(i).send(s);
-			}
-		}
 	}
 	
 }

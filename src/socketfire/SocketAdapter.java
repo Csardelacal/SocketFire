@@ -50,7 +50,14 @@ public class SocketAdapter {
 			baos.write(SINGLE_FRAME_UNMASKED);
 
 			//Next byte is length of payload
-			baos.write(msg.length);
+			if (msg.length > 125) {
+				baos.write(126);
+				baos.write(msg.length / 256);
+				baos.write(msg.length & 0xFF);
+			}
+			else {
+				baos.write(msg.length);
+			}
 
 			//Then goes the message
 			baos.write(msg);
@@ -65,10 +72,10 @@ public class SocketAdapter {
 		}
 	}
 	
-	public String read() {
+	public PartialMessage read(PartialMessage read) {
 		
 		try {
-			int buffLength  = 4096;
+			int buffLength  = 4096 * 2;
 
 			int len = 0;            
 			byte[] b = new byte[buffLength];
@@ -80,6 +87,7 @@ public class SocketAdapter {
 				//convertAndPrint(buf);
 				//And it with 00001111 to get four lower bits only, which is the opcode
 				int opcode = buf[0] & 0x0F;
+				int msgend = buf[0] & 0x80;
 
 				//Opcode 8 is close connection
 				if (opcode == 8) {
@@ -92,8 +100,7 @@ public class SocketAdapter {
 					return null;
 					//TODO: Server should unregister the client
 				} 
-				//Else I just assume it's a single framed text message (opcode 1)
-				else {
+				else if  (opcode == 0) {
 					final int payloadSize = getSizeOfPayload(buf[1]);
 					//System.out.println("Payloadsize: " + payloadSize);
 
@@ -104,7 +111,32 @@ public class SocketAdapter {
 					//method continues below!    
 					buf = unMask(Arrays.copyOfRange(buf, 0, 4), Arrays.copyOfRange(buf, 4, buf.length));
 					String message = new String(buf);
-					return message;
+					read = new PartialMessage(message);
+					read.setComplete(msgend != 0);
+					
+					return read;
+				}
+				//Else I just assume it's a single framed text message (opcode 1)
+				else {
+					int payloadSize = getSizeOfPayload(buf[1]);
+					if (payloadSize == 126) {
+						byte[] eps = new byte[2];
+						socket.getInputStream().read(eps);
+						payloadSize = (eps[0] & 0xFF) * 0x100 + (eps[1] & 0xFF);
+					}
+					//System.out.println("Payloadsize: " + payloadSize);
+
+					//Read the mask, which is 4 bytes, and than the payload
+					buf = readBytes(MASK_SIZE + payloadSize);
+					//System.out.println("Payload:");
+					//convertAndPrint(buf);
+					//method continues below!    
+					buf = unMask(Arrays.copyOfRange(buf, 0, 4), Arrays.copyOfRange(buf, 4, buf.length));
+					String message = new String(buf);
+					read = new PartialMessage(message);
+					read.setComplete(msgend != 0);
+					
+					return read;
 				}
 			}
 			
@@ -113,7 +145,7 @@ public class SocketAdapter {
 			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		
-		return "";
+		return null;
 	}
 	
 	private byte[] unMask(byte[] mask, byte[] data) {
