@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,26 +68,22 @@ public class Client extends Thread {
 		
 		this.name = "User - " + (Client.idCounter++);
 		
-		String headers = "";
-		String read;
+		ArrayList<String> headers = new ArrayList<>();
 		
 		do {
-			read = this.in.readLine();
-			headers += read + "\n";
+			headers.add(this.in.readLine());
 		}
-		while (read != null && !read.trim().equals(""));
+		while (this.in.ready());
 		
 		Handshake handshake = new Handshake(headers);
-		headers = handshake.getHeaders();
 		this.channel = this.server.getChannel(handshake.getRequestHeader("_location").getValue());
 		this.queue = new Queue(this.socketAdapter);
 		
 		
-		this.out.write(headers);
+		this.out.write(handshake.getHeaders());
 		this.out.flush();
 		this.channel.addClient(this);
 		this.send(new STDMessage(null, "Welcome to the EQTV server"));
-		//this.out = null;
 	}
 	
 	public void send(Message message) {

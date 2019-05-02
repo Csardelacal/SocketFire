@@ -63,8 +63,6 @@ public class SocketAdapter {
 			baos.write(msg);
 			baos.flush();
 			baos.close();
-			//This function only prints the byte representation of the frame in hex to console
-			//convertAndPrint(baos.toByteArray());
 
 			//Send the frame to the client
 			os.write(baos.toByteArray(), 0, baos.size());

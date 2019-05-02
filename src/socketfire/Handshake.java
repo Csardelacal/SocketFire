@@ -5,6 +5,7 @@ package socketfire;
  * and open the template in the editor.
  */
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import socketfire.handshake.Header;
 import socketfire.handshake.LocationHeader;
@@ -20,15 +21,19 @@ public class Handshake {
 	
 	private HashMap<String, Header> headers = new HashMap<>();
 	
-	public Handshake(String s) throws MalformedHeaderException {
+	public Handshake(ArrayList<String> s) throws MalformedHeaderException {
 		//System.out.println(s);
-		String[] headers_received = s.split("\n");
 		
-		for (String header : headers_received) {
+		for (String header : s) {
+			if (header.length() == 0) {
+				continue;
+			}
+			
 			Header h = null;
 			try {
 				h = new Header(header);
-			} catch (SpecialHeaderException ex) {
+			} 
+			catch (SpecialHeaderException ex) {
 				Class search = ex.getCorrectType();
 				if (search.equals(LocationHeader.class)) {
 					h = new LocationHeader(header);

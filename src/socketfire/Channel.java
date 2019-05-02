@@ -6,23 +6,16 @@
 
 package socketfire;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import socketfire.message.Message;
-
 /**
  *
  * @author cesar
  */
-public class Channel extends Dispatcher {
+public class Channel extends Dispatcher 
+{
 	
-	private Server server;
 	private String name;
 
-	public Channel(Server server, String name) {
-		this.server = server;
+	public Channel(String name) {
 		this.name = name;
 	}
 

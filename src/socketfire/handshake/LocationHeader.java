@@ -6,8 +6,6 @@
 
 package socketfire.handshake;
 
-import java.util.regex.Pattern;
-
 /**
  *
  * @author cesar

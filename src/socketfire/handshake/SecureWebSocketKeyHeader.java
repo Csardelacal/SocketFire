@@ -9,9 +9,9 @@ package socketfire.handshake;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.codec.binary.Base64;
 import socketfire.Handshake;
 
 /**
@@ -36,8 +36,7 @@ public class SecureWebSocketKeyHeader extends Header{
 		String key = this.getValue() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-1");
-			Base64 base64 = new Base64();
-			key = new String(base64.encode(md.digest(key.getBytes("UTF-8"))));
+			key = new String(Base64.getEncoder().encode(md.digest(key.getBytes("UTF-8"))));
 			return key;
 		}
 		catch(NoSuchAlgorithmException e) {
