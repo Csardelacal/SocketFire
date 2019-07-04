@@ -42,7 +42,9 @@ public class Server extends Dispatcher implements Runnable {
 	@Override
 	public void run() {
 		System.setProperty("javax.net.ssl.keyStore", "keystore.jks");
+		//System.setProperty("javax.net.ssl.trustStore", "keystore.jks");
 		System.setProperty("javax.net.ssl.keyStorePassword", "mytest");
+		//System.setProperty("javax.net.debug", "ssl");
 		
 		try {
 			SSLServerSocketFactory ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();

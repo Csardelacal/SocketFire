@@ -4,7 +4,11 @@
  * and open the template in the editor.
  */
 
-package socketfire.handshake;
+package socketfire.http;
+
+import socketfire.handshake.LocationHeader;
+import socketfire.handshake.SecureWebSocketKeyHeader;
+import socketfire.handshake.SpecialHeaderException;
 
 /**
  *

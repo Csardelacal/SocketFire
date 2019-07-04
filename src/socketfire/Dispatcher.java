@@ -31,10 +31,7 @@ abstract public class Dispatcher {
 	}
 	
 	public void dispatch(Message m) {
-		
-		if (this.isSilenced()) {
-			return;
-		}
+		System.out.println("Sending message");
 		
 		if (m.getTarget() != null) {
 			if (this.clients.contains(m.getTarget())) {

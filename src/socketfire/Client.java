@@ -33,7 +33,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import socketfire.handshake.MalformedHeaderException;
-import socketfire.message.AuthMessage;
 import socketfire.message.ChannelMessage;
 import socketfire.message.Message;
 import socketfire.message.STDMessage;
@@ -76,7 +75,7 @@ public class Client extends Thread {
 		while (this.in.ready());
 		
 		Handshake handshake = new Handshake(headers);
-		this.channel = this.server.getChannel(handshake.getRequestHeader("_location").getValue());
+		this.channel = this.server.getChannel("/test");
 		this.queue = new Queue(this.socketAdapter);
 		
 		
@@ -116,8 +115,6 @@ public class Client extends Thread {
 					args = new String[10];
 					for (int i = 0; i < argdata.length(); i++) args[i] = argdata.getString(i);
 					return new ServerMessage(this, data.getString("action"), args);
-				case Message.TYPE_AUTH:
-					return new AuthMessage(this, data.get("payload"));
 			}
 			//this.channel.broadcast(data.getString("payload"));
 		}

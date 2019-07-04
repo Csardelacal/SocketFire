@@ -86,7 +86,7 @@ public class AppValidator
 			
 			if (code != 200) {
 				System.out.println("Code received: " + code);
-				return false;
+				//return false;
 			}
 			
 			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));

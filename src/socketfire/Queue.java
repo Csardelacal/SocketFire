@@ -44,6 +44,7 @@ public class Queue extends Thread {
 		
 		Message msg = this.messages.remove(0);
 		JSONObject send = new JSONObject();
+		System.out.println("Sending message - queue");
 		try {
 			send.put("type",    msg.getType());
 			

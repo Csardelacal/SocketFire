@@ -7,7 +7,7 @@ package socketfire;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import socketfire.handshake.Header;
+import socketfire.http.Header;
 import socketfire.handshake.LocationHeader;
 import socketfire.handshake.MalformedHeaderException;
 import socketfire.handshake.SecureWebSocketKeyHeader;

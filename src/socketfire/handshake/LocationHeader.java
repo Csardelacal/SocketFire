@@ -6,6 +6,8 @@
 
 package socketfire.handshake;
 
+import socketfire.http.Header;
+
 /**
  *
  * @author cesar
@@ -26,6 +28,7 @@ public class LocationHeader extends Header{
 		}
 		
 		String[] location = data[1].split("/");
+		System.out.println(data[1]);
 		if (location.length > 1) {
 			this.channel = location[1];
 		}
