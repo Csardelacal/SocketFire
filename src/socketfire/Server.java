@@ -14,11 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.SSLServerSocketFactory;
 import socketfire.handshake.MalformedHeaderException;
-import socketfire.message.ChannelMessage;
-import socketfire.message.Message;
-import socketfire.message.STDMessage;
-import socketfire.message.ServerMessage;
-import socketfire.message.UserMessage;
 
 /**
  *
@@ -28,20 +23,13 @@ public class Server extends Dispatcher implements Runnable {
 	
 	private int port = 1337;
 	private HashMap<String, Channel> channels = new HashMap<>();
-	
-	private final EventManager<STDMessage> stdmessageEventManager = new EventManager<>();
-	private final EventManager<ChannelMessage> channelmessageEventManager = new EventManager<>();
-	private final EventManager<ServerMessage> severmessageEventManager = new EventManager<>();
-	private final EventManager<UserMessage> usermessageEventManager = new EventManager<>();
 
 	public Server(int port) {
 		this.port = port;
-		this.addMessageListener(Message.TYPE_CHAT, new DefaultMessageMirror());
 	}
 	
 	@Override
 	public void run() {
-		//System.setProperty("javax.net.debug", "ssl");
 		
 		try {
 			SSLServerSocketFactory ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
@@ -80,39 +68,6 @@ public class Server extends Dispatcher implements Runnable {
 			Channel channel = new Channel(id);
 			this.channels.put(id, channel);
 			return channel;
-		}
-	}
-	
-	/**
-	 * 
-	 * @deprecated 
-	 * @param msg 
-	 */
-	public void handleMessage(Message msg) {
-		switch(msg.getType()) {
-			case 0: this.stdmessageEventManager.trigger((STDMessage)msg); break;
-			case 2: this.usermessageEventManager.trigger((UserMessage)msg); break;
-			case 3: this.channelmessageEventManager.trigger((ChannelMessage)msg); break;
-			case 4: this.severmessageEventManager.trigger((ServerMessage)msg); break;
-		}
-	}
-	
-	/**
-	 * 
-	 * @deprecated 
-	 * @param type
-	 * @param messageEventListener 
-	 */
-	public void addMessageListener(int type, MessageEventListener messageEventListener) {
-		try {
-			switch(type) {
-				case 0: this.stdmessageEventManager.addEventListener(messageEventListener); break;
-				case 2: this.usermessageEventManager.addEventListener(messageEventListener); break;
-				case 3: this.channelmessageEventManager.addEventListener(messageEventListener); break;
-				case 4: this.severmessageEventManager.addEventListener(messageEventListener); break;
-			}
-		} catch (Exception e) {
-			System.out.println("Could not attach listener - " + e.getMessage());
 		}
 	}
 }

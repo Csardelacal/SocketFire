@@ -135,7 +135,7 @@ public class Client extends Thread {
 		PartialMessage str = null;
 		while (null != (str = this.socketAdapter.read(str))) {
 			if (str.isComplete()) {
-				this.handleMessage(this.parseMessage(str.getMessage()));
+				System.out.println(str.getMessage());
 				str = null;
 			}
 		}
@@ -145,11 +145,6 @@ public class Client extends Thread {
 		this.channel.dropClient(this);
 		this.queue.interrupt();
 		this.interrupt();
-	}
-
-	private void handleMessage(Message msg) {
-		if (msg == null) return;
-		this.server.handleMessage(msg);
 	}
 
 	public Server getServer() {
