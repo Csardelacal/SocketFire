@@ -50,19 +50,26 @@ public class Main {
 			return;
 		}
 		
-		try {
-			AppValidator v = new AppValidator(properties.getProperty("socketfire.sso.endpoint"), properties.getProperty("socketfire.sso.app.id"), properties.getProperty("socketfire.sso.app.secret"));
-			System.out.println(v.validate("sha512%3A1638362706%3A390035134%3A1529947125%3AB%2BsELaaKUOiT%2B0a2A%2FRXM4BZ65%2BK4hdai7%2BhHeAn5S4%2FL8Qj7y%3A8142e6ac0efc299d7cc493c7dccc2ecf405606b05783219257ecc83b7a512726ad89d57b81c492e8715b24d3c72bbfb37eec8a842a2370631ff0e1029fc92392"));
-			
-		} catch (NoSuchAlgorithmException | MalformedURLException | UnsupportedEncodingException ex) {
-			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-		} 
+		/*
+		 * Initalize the JKS for secure sockets to work.
+		 */
+		System.setProperty("javax.net.ssl.keyStore", "keystore.jks");
+		System.setProperty("javax.net.ssl.keyStorePassword", "mytest");
 		
-		
+		/*
+		 * Instance the servers, both web server and websocket server. These are the
+		 * core components of socketfire, allowing it to relay messages it received
+		 * to the websocket server.
+		 * 
+		 * Note: Right now, the connection between the two is hard coded into the 
+		 * web server. My intention is to separate the and providing the web server
+		 * with an "application layer" like CGI that allows the two to be interconnected
+		 * without any of them being dependent on the other.
+		 */
 		Server s = new Server(1337);
-		new Thread(s).start();
-		
 		WebServer ws = new WebServer(8080, s);
+		
+		new Thread(s).start();
 		new Thread(ws).start();
 	}
 	

@@ -41,9 +41,6 @@ public class Server extends Dispatcher implements Runnable {
 	
 	@Override
 	public void run() {
-		System.setProperty("javax.net.ssl.keyStore", "keystore.jks");
-		//System.setProperty("javax.net.ssl.trustStore", "keystore.jks");
-		System.setProperty("javax.net.ssl.keyStorePassword", "mytest");
 		//System.setProperty("javax.net.debug", "ssl");
 		
 		try {
@@ -85,7 +82,12 @@ public class Server extends Dispatcher implements Runnable {
 			return channel;
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @deprecated 
+	 * @param msg 
+	 */
 	public void handleMessage(Message msg) {
 		switch(msg.getType()) {
 			case 0: this.stdmessageEventManager.trigger((STDMessage)msg); break;
@@ -94,7 +96,13 @@ public class Server extends Dispatcher implements Runnable {
 			case 4: this.severmessageEventManager.trigger((ServerMessage)msg); break;
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @deprecated 
+	 * @param type
+	 * @param messageEventListener 
+	 */
 	public void addMessageListener(int type, MessageEventListener messageEventListener) {
 		try {
 			switch(type) {
