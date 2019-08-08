@@ -71,8 +71,14 @@ public class RequestFactory {
 		}
 		
 		if (length > 0) {
+			int read = 0;
+			
 			char[] buffer = new char[length];
-			reader.read(buffer, 0, length);
+			
+			while (read < length) {
+				read+= reader.read(buffer, read, length - read);
+			}
+			
 			body = new String(buffer);
 		}
 		

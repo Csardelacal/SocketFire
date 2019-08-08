@@ -16,7 +16,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import socketfire.Server;
+import socketfire.gateway.SocketFire;
+import socketfire.gateway.Standard;
+import socketfire.websocket.Server;
 import socketfire.sso.AppValidator;
 import socketfire.webserver.WebServer;
 
@@ -67,7 +69,10 @@ public class Main {
 		 * without any of them being dependent on the other.
 		 */
 		Server s = new Server(1337);
-		WebServer ws = new WebServer(8080, s);
+		WebServer ws = new WebServer(8081);
+		
+		ws.addListener(new SocketFire(s));
+		ws.addListener(new Standard());
 		
 		new Thread(s).start();
 		new Thread(ws).start();

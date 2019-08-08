@@ -8,13 +8,11 @@ package socketfire.webserver;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Properties;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.SSLServerSocketFactory;
-import socketfire.Server;
 import socketfire.handshake.SpecialHeaderException;
-import socketfire.message.STDMessage;
 
 /**
  *
@@ -24,15 +22,19 @@ public class WebServer implements Runnable {
 	
 	private final int port;
 	private final ServerSocket socket;
-	private final Server broadcast;
+	
+	private final ArrayList<Listener> listeners = new ArrayList<>();
 
-	public WebServer(int port, Server server) throws IOException {
+	public WebServer(int port) throws IOException {
 		
 		SSLServerSocketFactory ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 		
 		this.port = port;
 		this.socket = ssf.createServerSocket(this.port);
-		this.broadcast = server;
+	}
+	
+	public void addListener(Listener listener) {
+		this.listeners.add(listener);
 	}
 
 	@Override
@@ -45,8 +47,8 @@ public class WebServer implements Runnable {
 		Socket client;
 		RequestFactory rf = new RequestFactory();
 		
-		try {
-			do { 
+		do { 
+			try {
 				/*
 				 * First we deal with the incoming connection and reply to it, so the
 				 * other server can continue working while we deal with the broadcasting
@@ -60,21 +62,22 @@ public class WebServer implements Runnable {
 				 * their request, we sent them an acknoledgment and close the connection.
 				 */
 				Request request = rf.receive(client);
-				request.handle().send(client);
-				client.close();
 				
-				/*
-				 * Send the broadcast to the broadcasting server so that all the websockets
-				 * can connect to it and read the appropriate messages.
-				 */
-				this.broadcast.getChannel(request.getPath()).dispatch(new STDMessage(null, request.getBody()));
-			} while (true);
-		} 
-		catch (IOException ex) {
-			Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (SpecialHeaderException ex) {
-			Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
-		}
+				for (int i = 0; i < this.listeners.size(); i++) {
+					try {
+						this.listeners.get(i).answer(request).send(client);
+						client.close();
+						break;
+					}
+					catch (IOException ex) { /*Fine exception*/ }
+				}
+			}
+			catch (IOException ex) {
+				Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (SpecialHeaderException ex) {
+				Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}  while (true);
 	}
 	
 	

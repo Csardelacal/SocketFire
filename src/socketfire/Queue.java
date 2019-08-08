@@ -6,6 +6,7 @@
 
 package socketfire;
 
+import socketfire.websocket.SocketAdapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;

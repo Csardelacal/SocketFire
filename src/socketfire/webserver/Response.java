@@ -34,6 +34,8 @@ public class Response {
 			OutputStreamWriter o = new OutputStreamWriter(socket.getOutputStream());
 			o.write("HTTP/2.0 200 OK\n");
 			
+			this.headers.add(new Header("Content-length", Integer.toString(this.body.length())));
+			
 			for (int i = 0; i < this.headers.size(); i++) {
 				o.write(this.headers.get(i).getKey() + ": " + this.headers.get(i).getValue());
 				o.write("\n");

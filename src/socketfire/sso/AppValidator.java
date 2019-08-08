@@ -72,7 +72,7 @@ public class AppValidator
 	}
 	
 	public boolean validate(String remoteSignature) throws NoSuchAlgorithmException, MalformedURLException, UnsupportedEncodingException {
-		String urlv = this.url + "/auth/app.json?signature=" + URLEncoder.encode(this.makeSignature(), "UTF-8") + "&remote=" + remoteSignature;
+		String urlv = this.url + "/auth/app.json?signature=" + URLEncoder.encode(this.makeSignature(), "UTF-8") + "&remote=" + URLEncoder.encode(remoteSignature, "UTF-8");
 		System.out.println(urlv);
 		URL request = new URL(urlv);
 		String response = "";

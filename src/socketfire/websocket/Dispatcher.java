@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 
-package socketfire;
+package socketfire.websocket;
 
+import socketfire.websocket.Client;
 import java.util.ArrayList;
 import socketfire.message.Message;
 

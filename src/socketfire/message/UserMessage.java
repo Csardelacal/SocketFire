@@ -8,7 +8,7 @@ package socketfire.message;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import socketfire.Client;
+import socketfire.websocket.Client;
 
 /**
  *

@@ -1,4 +1,4 @@
-package socketfire;
+package socketfire.websocket;
 
 /*
  * To change this template, choose Tools | Templates
@@ -23,6 +23,8 @@ For testing
 */
 
 
+import socketfire.websocket.Channel;
+import socketfire.websocket.Server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,6 +34,9 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import socketfire.Handshake;
+import socketfire.PartialMessage;
+import socketfire.Queue;
 import socketfire.handshake.MalformedHeaderException;
 import socketfire.message.ChannelMessage;
 import socketfire.message.Message;

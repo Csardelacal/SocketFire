@@ -6,7 +6,7 @@
 
 package socketfire.message;
 
-import socketfire.Client;
+import socketfire.websocket.Client;
 
 /**
  *

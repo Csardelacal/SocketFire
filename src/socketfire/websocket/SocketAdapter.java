@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package socketfire;
+package socketfire.websocket;
 
+import socketfire.websocket.Client;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,7 +13,8 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static socketfire.Client.MASK_SIZE;
+import socketfire.PartialMessage;
+import static socketfire.websocket.Client.MASK_SIZE;
 import static socketfire.Queue.SINGLE_FRAME_UNMASKED;
 
 /**
@@ -50,7 +52,19 @@ public class SocketAdapter {
 			baos.write(SINGLE_FRAME_UNMASKED);
 
 			//Next byte is length of payload
-			if (msg.length > 125) {
+			System.out.println("Length" + msg.length);
+			if (msg.length > 65536) {
+				baos.write(127);
+				baos.write((msg.length / (int)Math.pow(2, 56)) & 0x7F);
+				baos.write((msg.length / (int)Math.pow(2, 48)) & 0xFF);
+				baos.write((msg.length / (int)Math.pow(2, 40)) & 0xFF);
+				baos.write((msg.length / (int)Math.pow(2, 32)) & 0xFF);
+				baos.write((msg.length / (int)Math.pow(2, 24)) & 0xFF);
+				baos.write((msg.length / (int)Math.pow(2, 16)) & 0xFF);
+				baos.write((msg.length / (int)Math.pow(2,  8)) & 0xFF);
+				baos.write(msg.length & 0xFF);
+			}
+			else if (msg.length > 125) {
 				baos.write(126);
 				baos.write(msg.length / 256);
 				baos.write(msg.length & 0xFF);
@@ -65,8 +79,16 @@ public class SocketAdapter {
 			baos.close();
 
 			//Send the frame to the client
-			os.write(baos.toByteArray(), 0, baos.size());
-			os.flush();
+			int max = 4096;
+			int current = 0;
+			int length = baos.size();
+			byte[] ba = baos.toByteArray();
+			
+			while (current < length) {
+				os.write(ba, current, Math.min(length, current + max) - current);
+				os.flush();
+				current+= max;
+			} 
 		}
 	}
 	

@@ -1,4 +1,4 @@
-package socketfire;
+package socketfire.websocket;
 
 /*
  * To change this template, choose Tools | Templates

@@ -75,4 +75,8 @@ public class Request {
 	public String getPath() {
 		return this.path;
 	}
+	
+	public ArrayList<Header> getHeaders() {
+		return this.headers;
+	}
 }
