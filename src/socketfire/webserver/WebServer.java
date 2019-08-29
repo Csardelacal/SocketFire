@@ -73,7 +73,8 @@ public class WebServer implements Runnable {
 				}
 			}
 			catch (IOException ex) {
-				Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+				System.out.println("Client handshake failed");
+				System.out.println("> " + ex.getMessage());
 			} catch (SpecialHeaderException ex) {
 				Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
 			}

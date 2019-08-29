@@ -58,8 +58,6 @@ public class AppValidator
 		String salt      = this.randomString(20);
 		String signature = appId + "." + appSecret + "." + timestamp + "." + salt;
 		
-		System.out.println(timestamp);
-		
 		MessageDigest md = MessageDigest.getInstance("SHA-512");
 		byte[] bytes = md.digest(signature.getBytes(StandardCharsets.UTF_8));
 		StringBuilder sb = new StringBuilder();
@@ -71,22 +69,21 @@ public class AppValidator
 		return "sha512:" + appId + ":" + timestamp + ":" + salt + ":" + sb.toString();
 	}
 	
-	public boolean validate(String remoteSignature) throws NoSuchAlgorithmException, MalformedURLException, UnsupportedEncodingException {
-		String urlv = this.url + "/auth/app.json?signature=" + URLEncoder.encode(this.makeSignature(), "UTF-8") + "&remote=" + URLEncoder.encode(remoteSignature, "UTF-8");
-		System.out.println(urlv);
-		URL request = new URL(urlv);
-		String response = "";
-		
+	public boolean validate(String remoteSignature) throws MalformedURLException, UnsupportedEncodingException {
 		
 		try {
+			String urlv = this.url + "/auth/app.json?signature=" + URLEncoder.encode(this.makeSignature(), "UTF-8") + "&remote=" + URLEncoder.encode(remoteSignature, "UTF-8");
+			URL request = new URL(urlv);
+			String response = "";
+			
 			HttpURLConnection connection = (HttpURLConnection)request.openConnection();
 			connection.setRequestMethod("GET");
 			connection.connect();
 			int code = connection.getResponseCode();
 			
 			if (code != 200) {
-				System.out.println("Code received: " + code);
-				//return false;
+				System.out.println("Authentication error. Code received: " + code);
+				return false;
 			}
 			
 			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
@@ -95,7 +92,6 @@ public class AppValidator
 				 response = response + line;
 			}
 			
-			System.out.println(response);
 			JSONObject data = new JSONObject(response);
 			return (boolean)data.getBoolean("authenticated");
 		} 
@@ -103,6 +99,9 @@ public class AppValidator
 			Logger.getLogger(AppValidator.class.getName()).log(Level.SEVERE, null, ex);
 		} 
 		catch (IOException ex) {
+			Logger.getLogger(AppValidator.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		catch (NoSuchAlgorithmException ex) {
 			Logger.getLogger(AppValidator.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		

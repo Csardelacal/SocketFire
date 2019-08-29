@@ -22,7 +22,6 @@ public class Handshake {
 	private HashMap<String, Header> headers = new HashMap<>();
 	
 	public Handshake(ArrayList<String> s) throws MalformedHeaderException {
-		//System.out.println(s);
 		
 		for (String header : s) {
 			if (header.length() == 0) {

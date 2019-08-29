@@ -43,11 +43,6 @@ public class SocketFire implements Listener {
 		System.out.println(request.getPath());
 		String signature = null;
 		
-		for (int i = 0; i < request.getHeaders().size(); i++) {
-			
-			System.out.println(request.getHeaders().get(i).getKey() + ":" + request.getHeaders().get(i).getValue());
-		}
-		
 		JSONObject json = request.getBody() != null? new JSONObject(request.getBody()) : new JSONObject();
 		
 		if (!json.has("signature")) {
@@ -64,9 +59,6 @@ public class SocketFire implements Listener {
 		} 
 		catch (UnsupportedEncodingException ex) {
 			return new Response(new ArrayList<Header>(), json.has("hello")? json.getString("hello") : "Invalid encoding");
-		} 
-		catch (NoSuchAlgorithmException ex) {
-			Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
 		} 
 		catch (MalformedURLException ex) {
 			Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);

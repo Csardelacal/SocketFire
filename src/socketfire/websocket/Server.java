@@ -51,7 +51,8 @@ public class Server extends Dispatcher implements Runnable {
 					Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
 				} 
 				catch (IOException e) {
-					Logger.getLogger(Server.class.getName()).log(Level.SEVERE, "Captured IO Exception while initializing the connection", e);
+					System.out.println("Client handshake failed");
+					System.out.println("> " + e.getMessage());
 				}
 			}
 			
