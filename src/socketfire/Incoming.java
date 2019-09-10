@@ -10,12 +10,12 @@ package socketfire;
  *
  * @author cesar
  */
-public class PartialMessage {
+public class Incoming {
 	
 	private String message;
 	private boolean complete;
 
-	public PartialMessage(String message) {
+	public Incoming(String message) {
 		this.message = message;
 	}
 

@@ -13,7 +13,7 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import socketfire.PartialMessage;
+import socketfire.Incoming;
 import static socketfire.websocket.Client.MASK_SIZE;
 import static socketfire.Queue.SINGLE_FRAME_UNMASKED;
 
@@ -27,11 +27,11 @@ public class SocketAdapter {
 	private BufferedOutputStream out;
 	private InputStreamReader in;
 	private boolean requestedClosing = false;
-	private final Client client;
+	private Client client;
 	
-	public SocketAdapter(Socket socket, Client client) throws IOException {
+	public SocketAdapter(Socket socket) throws IOException {
 		this.socket = socket;
-		this.client = client;
+		this.client = null;
 		this.out = new BufferedOutputStream(socket.getOutputStream());
 		this.in  = new InputStreamReader(socket.getInputStream());
 	}
@@ -92,7 +92,7 @@ public class SocketAdapter {
 		}
 	}
 	
-	public PartialMessage read(PartialMessage read) {
+	public Incoming read(Incoming read) {
 		
 		try {
 			int buffLength  = 4096 * 2;
@@ -131,7 +131,7 @@ public class SocketAdapter {
 					//method continues below!    
 					buf = unMask(Arrays.copyOfRange(buf, 0, 4), Arrays.copyOfRange(buf, 4, buf.length));
 					String message = new String(buf);
-					read = new PartialMessage(message);
+					read = new Incoming(message);
 					read.setComplete(msgend != 0);
 					
 					return read;
@@ -153,7 +153,7 @@ public class SocketAdapter {
 					//method continues below!    
 					buf = unMask(Arrays.copyOfRange(buf, 0, 4), Arrays.copyOfRange(buf, 4, buf.length));
 					String message = new String(buf);
-					read = new PartialMessage(message);
+					read = new Incoming(message);
 					read.setComplete(msgend != 0);
 					
 					return read;
@@ -202,5 +202,9 @@ public class SocketAdapter {
 				return;
 			}
 		}
+	}
+	
+	public void setClient(Client client) {
+		this.client = client;
 	}
 }

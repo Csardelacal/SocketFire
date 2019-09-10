@@ -12,15 +12,8 @@ import socketfire.websocket.Client;
  *
  * @author cesar
  */
-public abstract class Message {
+public class Message {
 	
-	public static final int TYPE_CHAT    = 0;
-	public static final int TYPE_AUTH    = 1;
-	public static final int TYPE_USER    = 2;
-	public static final int TYPE_CHANNEL = 3;
-	public static final int TYPE_SERVER  = 4;
-	
-	private int type = 0;
 	private Client src;
 	private Client target = null;
 	
@@ -28,9 +21,8 @@ public abstract class Message {
 	private boolean bubble = true;
 	
 	
-	public Message(int type, Object payload, Client src) {
+	public Message(Object payload, Client src) {
 		this.payload = payload;
-		this.type = type;
 		this.src = src;
 	}
 
@@ -40,14 +32,6 @@ public abstract class Message {
 
 	public void setPayload(Object payload) {
 		this.payload = payload;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
 	}
 	
 	public void stopPropagation() {
@@ -74,6 +58,8 @@ public abstract class Message {
 		this.target = target;
 	}
 	
-	
+	public String getMessage() {
+		return (String)this.getPayload();
+	}
 	
 }

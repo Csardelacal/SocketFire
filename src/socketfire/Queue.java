@@ -47,15 +47,8 @@ public class Queue extends Thread {
 		JSONObject send = new JSONObject();
 		System.out.println("Sending message - queue");
 		try {
-			send.put("type",    msg.getType());
 			
-			if (msg.getPayload() instanceof String) {
-				send.put("payload", msg.getPayload());
-			} else {
-				JSONObject payload = (JSONObject)msg.getPayload();
-				send.put("action", payload.get("action"));
-				send.put("args",   payload.get("args"));
-			}
+			send.put("payload", msg.getPayload());
 			
 			if (msg.getSrc() != null) {
 				send.put("src",     msg.getSrc().getClientName());

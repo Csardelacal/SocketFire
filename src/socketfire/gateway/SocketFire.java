@@ -8,7 +8,6 @@ package socketfire.gateway;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -17,7 +16,7 @@ import javax.security.sasl.AuthenticationException;
 import org.json.JSONObject;
 import socketfire.PropertyLoader;
 import socketfire.http.Header;
-import socketfire.message.STDMessage;
+import socketfire.message.Message;
 import socketfire.sso.AppValidator;
 import socketfire.webserver.Listener;
 import socketfire.webserver.Request;
@@ -71,7 +70,7 @@ public class SocketFire implements Listener {
 		 * Send the broadcast to the broadcasting server so that all the websockets
 		 * can connect to it and read the appropriate messages.
 		 */
-		this.broadcast.getChannel(request.getPath()).dispatch(new STDMessage(null, json.has("body")? json.getString("body") : ""));
+		this.broadcast.getChannel(request.getPath()).dispatch(new Message(json.has("body")? json.getString("body") : "", null));
 		
 		return new Response(new ArrayList<Header>(), json.has("body")? "Queued" : "Skipped empty message");
 		

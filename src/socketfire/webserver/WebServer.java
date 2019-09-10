@@ -5,6 +5,7 @@
  */
 package socketfire.webserver;
 
+import socketfire.http.RequestFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -75,9 +76,7 @@ public class WebServer implements Runnable {
 			catch (IOException ex) {
 				System.out.println("Client handshake failed");
 				System.out.println("> " + ex.getMessage());
-			} catch (SpecialHeaderException ex) {
-				Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
-			}
+			} 
 		}  while (true);
 	}
 	

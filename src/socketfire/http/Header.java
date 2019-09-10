@@ -26,16 +26,16 @@ public class Header {
 		this.value = value.trim();
 	}
 	
-	public Header(String rawHeader) throws SpecialHeaderException {
+	public Header(String rawHeader) {
 		String[] data = rawHeader.split(":");
 		
-		if (data.length == 1){
+		/*if (data.length == 1){
 			throw new SpecialHeaderException(LocationHeader.class);
-		}
+		}/**/
 		
-		if (data[0].equals("Sec-WebSocket-Key")) {
+		/*if (data[0].equals("Sec-WebSocket-Key")) {
 			throw new SpecialHeaderException(SecureWebSocketKeyHeader.class);
-		}
+		}/**/
 		
 		this.name  = data[0].trim();
 		this.value = data[1].trim();

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package socketfire.webserver;
+package socketfire.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import socketfire.handshake.SpecialHeaderException;
 import socketfire.http.Header;
+import socketfire.webserver.Request;
 
 /**
  *
@@ -19,7 +20,7 @@ import socketfire.http.Header;
  */
 public class RequestFactory {
 	
-	public Request receive(Socket incoming) throws IOException, SpecialHeaderException {
+	public Request receive(Socket incoming) throws IOException {
 		/*
 		 * We start a buffered reader that will start off by receiving all the 
 		 * information that the client wishes to send.

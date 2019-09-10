@@ -5,13 +5,14 @@ package socketfire;
  * and open the template in the editor.
  */
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Base64;
 import socketfire.http.Header;
-import socketfire.handshake.LocationHeader;
-import socketfire.handshake.MalformedHeaderException;
 import socketfire.handshake.SecureWebSocketKeyHeader;
-import socketfire.handshake.SpecialHeaderException;
 
 /**
  *
@@ -19,41 +20,29 @@ import socketfire.handshake.SpecialHeaderException;
  */
 public class Handshake {
 	
-	private HashMap<String, Header> headers = new HashMap<>();
+	private String sec;
 	
-	public Handshake(ArrayList<String> s) throws MalformedHeaderException {
+	public Handshake(ArrayList<Header> h) throws IOException {
 		
-		for (String header : s) {
-			if (header.length() == 0) {
-				continue;
-			}
-			
-			Header h = null;
-			try {
-				h = new Header(header);
-			} 
-			catch (SpecialHeaderException ex) {
-				Class search = ex.getCorrectType();
-				if (search.equals(LocationHeader.class)) {
-					h = new LocationHeader(header);
-				}
-				else if (search.equals(SecureWebSocketKeyHeader.class)) {
-					h = new SecureWebSocketKeyHeader(header);
-				}
-			}
-			
-			if (h != null) {
-				this.headers.put(h.getKey(), h);
+		Header sec = null;
+		
+		for (int i = 0; i < h.size(); i++) {
+			if (h.get(i).getKey().equals("Sec-WebSocket-Key")) {
+				sec = h.get(i);
 			}
 		}
-	}
-	
-	public Header getRequestHeader(String name) {
-		if (this.headers.containsKey(name)) {
-			return this.headers.get(name);
+		
+		if (sec == null) {
+			throw new IOException("Handshake failed");
 		}
-		else {
-			return null;
+		
+		String key = sec.getValue() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-1");
+			this.sec = new String(Base64.getEncoder().encode(md.digest(key.getBytes("UTF-8"))));
+		}
+		catch(NoSuchAlgorithmException | UnsupportedEncodingException ex) {
+			throw new IOException(ex);
 		}
 	}
 	
@@ -61,7 +50,7 @@ public class Handshake {
 		return "HTTP/1.1 101 Switching Protocols\r\n" +
 			new Header("Upgrade", "WebSocket") + "\r\n" +
 			new Header("Connection", "Upgrade") +"\r\n" +
-			new Header("Sec-WebSocket-Accept", ((SecureWebSocketKeyHeader)this.headers.get("Sec-WebSocket-Key")).getAcceptKey()) + "\r\n" +
+			new Header("Sec-WebSocket-Accept", sec) + "\r\n" +
 			"\r\n";
 	}
 	
